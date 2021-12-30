@@ -40,7 +40,7 @@ Wiring
 Raspberry Pico
 
      UART0 TX   * Pin  1-----|USB|------Pin 40 *   VBUS
-                * Pin  2     ‾‾‾‾      Pin 39 * 
+                * Pin  2     `‾‾‾´      Pin 39 * 
                 * Pin  3                Pin 38 *   GND
                 * Pin  4                Pin 37 * 
                 * Pin  5                Pin 36 *   3V3
