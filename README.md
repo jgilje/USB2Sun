@@ -14,6 +14,12 @@ The Pico board is powered by the Sun workstation's 5V supply.
 
 I've used Pico SDK v1.3 when developing.
 
+Missing Features
+----------------
+* Keyboard power on. Shorting minidin pin 7 to 5V rail powers on the system, however, the 5V rail is unpowered when the system is off - so the Pico is also unpowered in this state.
+* The left function keys. These are typically not available on a generic USB keyboard, so these should be mapped to some magic key combos. Esp. the Stop key is missing.
+* LED indicators (num - caps and scroll lock).
+
 Build
 -----
 Make sure the Pico SDK has been checked out, as detailed by the Pi foundation.
@@ -39,7 +45,7 @@ Wiring
 ------
 Raspberry Pico
 
-     UART0 TX   * Pin  1-----|USB|------Pin 40 *   VBUS
+     UART0 TX   * Pin  1-----|USB|------Pin 40 *   5V
                 * Pin  2     `‾‾‾´      Pin 39 * 
                 * Pin  3                Pin 38 *   GND
                 * Pin  4                Pin 37 * 
@@ -75,7 +81,7 @@ Raspberry Pico
 
 3V3 to 5V level shifter
 
-          GND   * Pin  1----------------Pin 20 *   VBUS
+          GND   * Pin  1----------------Pin 20 *   5V
      UART1 TX   * Pin  2                Pin 19 *
                 * Pin  3                Pin 18 *   KBD TX
      UART0 TX   * Pin  4                Pin 17 *
@@ -104,8 +110,8 @@ MiniDin-8 plug
 |-----|------------|
 | 1   | GND        |
 | 2   | GND        |
-| 3   | VBUS       |
+| 3   | 5V         |
 | 4   | MOUSE TX   |
 | 5   | KBD RX     |
 | 6   | KBD TX     |
-| 8   | VBUS       |
+| 8   | 5V         |
