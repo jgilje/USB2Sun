@@ -14,11 +14,30 @@ The Pico board is powered by the Sun workstation's 5V supply.
 
 I've used Pico SDK v1.3 when developing.
 
+Features
+--------
+* Emulate the left keyboard function keys by entering LeftShift+LeftControl and the corresponding key
+
+  | PC  | Function   |
+  |-----|------------|
+  | F1  | Stop       |
+  | F2  | Again      |
+  | 1   | Props      |
+  | 2   | Undo       |
+  | Q   | Front      |
+  | W   | Copy       |
+  | A   | Open       |
+  | S   | Paste      |
+  | Z   | Find       |
+  | X   | Cut        |
+
+  Breaking into OpenFirmware would be LeftShift+LeftControl+F1+A
+
 Missing Features
 ----------------
 * Keyboard power on. Shorting minidin pin 7 to 5V rail powers on the system, however, the 5V rail is unpowered when the system is off - so the Pico is also unpowered in this state.
-* The left function keys. These are typically not available on a generic USB keyboard, so these should be mapped to some magic key combos. Esp. the Stop key is missing.
 * LED indicators (num - caps and scroll lock).
+* Switching layouts. PC or Unix layout and international layout (the emulated keyboard responds US for now).
 
 Build
 -----

@@ -31,7 +31,6 @@ void on_keyboard_rx() {
     while (uart_is_readable(UART_KBD_ID)) {
         // printf("System command: ");
         uint8_t ch = uart_getc(UART_KBD_ID);
-        // Can we send it back?
 
         switch (ch) {
           case 0x01: // reset
@@ -80,79 +79,81 @@ static inline bool find_key_in_report(hid_keyboard_report_t const *report, uint8
   return false;
 }
 
-static uint8_t handle_modifier_press(hid_keyboard_report_t const *report, hid_keyboard_report_t const *prev, uint8_t modifier, uint8_t key) {
-  if ((report->modifier & modifier) && ((prev->modifier & modifier) == 0)) {
-    uint8_t ch = usb2sun[key];
-    // printf("make (mod) 0x%x => 0x%x\n", key, ch);
-    uart_putc_raw(UART_KBD_ID, ch);
-    return 1;
-  }
-  return 0;
-}
-
-static uint8_t handle_modifier_release(hid_keyboard_report_t const *report, hid_keyboard_report_t const *prev, uint8_t modifier, uint8_t key) {
-  if (((report->modifier & modifier) == 0) && (prev->modifier & modifier)) {
-    uint8_t ch = usb2sun[key] | 0x80;
-    // printf("break (mod) 0x%x => 0x%x\n", key, ch);
-    uart_putc_raw(UART_KBD_ID, ch);
-    return 1;
-  }
-  return 0;
-}
+static uint8_t hotkey_combo = KEYBOARD_MODIFIER_LEFTSHIFT | KEYBOARD_MODIFIER_LEFTCTRL;
+static uint8_t active_key_list[128];
+static uint8_t active_keys = 0;
 
 void process_kbd_report(hid_keyboard_report_t const *report) {
-  static hid_keyboard_report_t prev_report = { 0, 0, {0} };
-  int active_keys = __builtin_popcount(report->modifier);// + __builtin_popcount(prev_report.modifier);
+  uint8_t current_key_list[128];
+  memset(current_key_list, 0, sizeof(current_key_list));
 
-  // make codes
   if (report->modifier != 0) {
-    handle_modifier_press(report, &prev_report, KEYBOARD_MODIFIER_LEFTSHIFT, HID_KEY_SHIFT_LEFT);
-    handle_modifier_press(report, &prev_report, KEYBOARD_MODIFIER_LEFTCTRL, HID_KEY_CONTROL_LEFT);
-    handle_modifier_press(report, &prev_report, KEYBOARD_MODIFIER_LEFTALT, HID_KEY_ALT_LEFT);
-    handle_modifier_press(report, &prev_report, KEYBOARD_MODIFIER_LEFTGUI, HID_KEY_GUI_LEFT);
-    handle_modifier_press(report, &prev_report, KEYBOARD_MODIFIER_RIGHTSHIFT, HID_KEY_SHIFT_RIGHT);
-    handle_modifier_press(report, &prev_report, KEYBOARD_MODIFIER_RIGHTCTRL, HID_KEY_CONTROL_RIGHT);
-    handle_modifier_press(report, &prev_report, KEYBOARD_MODIFIER_RIGHTALT, HID_KEY_ALT_RIGHT);
-    handle_modifier_press(report, &prev_report, KEYBOARD_MODIFIER_RIGHTGUI, HID_KEY_GUI_RIGHT);
+    current_key_list[usb2sun[HID_KEY_SHIFT_LEFT]]    = report->modifier & KEYBOARD_MODIFIER_LEFTSHIFT  ? 1 : 0;
+    current_key_list[usb2sun[HID_KEY_CONTROL_LEFT]]  = report->modifier & KEYBOARD_MODIFIER_LEFTCTRL   ? 1 : 0;
+    current_key_list[usb2sun[HID_KEY_ALT_LEFT]]      = report->modifier & KEYBOARD_MODIFIER_LEFTALT    ? 1 : 0;
+    current_key_list[usb2sun[HID_KEY_GUI_LEFT]]      = report->modifier & KEYBOARD_MODIFIER_LEFTGUI    ? 1 : 0;
+    current_key_list[usb2sun[HID_KEY_SHIFT_RIGHT]]   = report->modifier & KEYBOARD_MODIFIER_RIGHTSHIFT ? 1 : 0;
+    current_key_list[usb2sun[HID_KEY_CONTROL_RIGHT]] = report->modifier & KEYBOARD_MODIFIER_RIGHTCTRL  ? 1 : 0;
+    current_key_list[usb2sun[HID_KEY_ALT_RIGHT]]     = report->modifier & KEYBOARD_MODIFIER_RIGHTALT   ? 1 : 0;
+    current_key_list[usb2sun[HID_KEY_GUI_RIGHT]]     = report->modifier & KEYBOARD_MODIFIER_RIGHTGUI   ? 1 : 0;
   }
-  for (uint8_t i = 0; i < 6; i++) {
+
+  uint8_t i = 0;
+  if (report->modifier == hotkey_combo) {
+    switch (report->keycode[i]) {
+      case HID_KEY_F1:
+        current_key_list[SUN_KEY_STOP] = 1;
+        break;
+      case HID_KEY_F2:
+        current_key_list[SUN_KEY_AGAIN] = 1;
+        break;
+      case HID_KEY_1:
+        current_key_list[SUN_KEY_PROPS] = 1;
+        break;
+      case HID_KEY_2:
+        current_key_list[SUN_KEY_UNDO] = 1;
+        break;
+      case HID_KEY_Q:
+        current_key_list[SUN_KEY_FRONT] = 1;
+        break;
+      case HID_KEY_W:
+        current_key_list[SUN_KEY_COPY] = 1;
+        break;
+      case HID_KEY_A:
+        current_key_list[SUN_KEY_OPEN] = 1;
+        break;
+      case HID_KEY_S:
+        current_key_list[SUN_KEY_PASTE] = 1;
+        break;
+      case HID_KEY_Z:
+        current_key_list[SUN_KEY_FIND] = 1;
+        break;
+      case HID_KEY_X:
+        current_key_list[SUN_KEY_CUT] = 1;
+        break;
+    }
+    i++;
+  }
+  for (; i < 6; i++) {
     if (report->keycode[i]) {
-      if (! find_key_in_report(&prev_report, report->keycode[i])) {
-        uint8_t ch = usb2sun[report->keycode[i]];
-        // printf("make 0x%x => 0x%x\n", report->keycode[i], ch);
-        uart_putc_raw(UART_KBD_ID, ch);
-        active_keys++;
-      }
+      current_key_list[usb2sun[report->keycode[i]]] = 1;
     }
   }
 
-  // break codes
-  if (report->modifier != prev_report.modifier) {
-    handle_modifier_release(report, &prev_report, KEYBOARD_MODIFIER_LEFTSHIFT, HID_KEY_SHIFT_LEFT);
-    handle_modifier_release(report, &prev_report, KEYBOARD_MODIFIER_LEFTCTRL, HID_KEY_CONTROL_LEFT);
-    handle_modifier_release(report, &prev_report, KEYBOARD_MODIFIER_LEFTALT, HID_KEY_ALT_LEFT);
-    handle_modifier_release(report, &prev_report, KEYBOARD_MODIFIER_LEFTGUI, HID_KEY_GUI_LEFT);
-    handle_modifier_release(report, &prev_report, KEYBOARD_MODIFIER_RIGHTSHIFT, HID_KEY_SHIFT_RIGHT);
-    handle_modifier_release(report, &prev_report, KEYBOARD_MODIFIER_RIGHTCTRL, HID_KEY_CONTROL_RIGHT);
-    handle_modifier_release(report, &prev_report, KEYBOARD_MODIFIER_RIGHTALT, HID_KEY_ALT_RIGHT);
-    handle_modifier_release(report, &prev_report, KEYBOARD_MODIFIER_RIGHTGUI, HID_KEY_GUI_RIGHT);
-  }
-  for (uint8_t i = 0; i < 6; i++) {
-    if (prev_report.keycode[i]) {
+  for (uint8_t i = 0; i < 128; i++) {
+    if (active_key_list[i] && !current_key_list[i]) {
+      uart_putc_raw(UART_KBD_ID, i | 0x80);
+      active_key_list[i] = 0;
+      active_keys--;
+    }
+    if (!active_key_list[i] && current_key_list[i]) {
+      uart_putc_raw(UART_KBD_ID, i);
+      active_key_list[i] = 1;
       active_keys++;
-      if (! find_key_in_report(report, prev_report.keycode[i])) {
-        uint8_t ch = usb2sun[prev_report.keycode[i]] | 0x80;
-        // printf("break 0x%x => 0x%x\n", prev_report.keycode[i], ch);
-        uart_putc_raw(UART_KBD_ID, ch);
-        active_keys--;
-      }
     }
   }
 
   if (active_keys == 0) {
-    // printf("idle\n");
     uart_putc_raw(UART_KBD_ID, 0x7f);
   }
-
-  prev_report = *report;
 }

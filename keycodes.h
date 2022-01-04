@@ -132,4 +132,15 @@ static const uint8_t usb2sun[256] = {
   [HID_KEY_KEYPAD_9] = 0x46,
 };
 
+#define SUN_KEY_STOP  0x01
+#define SUN_KEY_AGAIN 0x03
+#define SUN_KEY_PROPS 0x19
+#define SUN_KEY_UNDO  0x1a
+#define SUN_KEY_FRONT 0x31
+#define SUN_KEY_COPY  0x33
+#define SUN_KEY_OPEN  0x48
+#define SUN_KEY_PASTE 0x49
+#define SUN_KEY_FIND  0x5f
+#define SUN_KEY_CUT   0x61
+
 #endif
