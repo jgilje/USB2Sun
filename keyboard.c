@@ -69,16 +69,6 @@ void on_keyboard_rx() {
     }
 }
 
-static inline bool find_key_in_report(hid_keyboard_report_t const *report, uint8_t keycode) {
-  for (uint8_t i = 0; i < 6; i++) {
-    if (report->keycode[i] == keycode) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 static uint8_t hotkey_combo = KEYBOARD_MODIFIER_LEFTSHIFT | KEYBOARD_MODIFIER_LEFTCTRL;
 static uint8_t active_key_list[128];
 static uint8_t active_keys = 0;
@@ -100,6 +90,8 @@ void process_kbd_report(hid_keyboard_report_t const *report) {
 
   uint8_t i = 0;
   if (report->modifier == hotkey_combo) {
+    current_key_list[usb2sun[HID_KEY_SHIFT_LEFT]] = 0;
+    current_key_list[usb2sun[HID_KEY_CONTROL_LEFT]] = 0;
     switch (report->keycode[i]) {
       case HID_KEY_F1:
         current_key_list[SUN_KEY_STOP] = 1;
