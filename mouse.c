@@ -66,13 +66,12 @@ void mouse_tx() {
 }
 
 void process_mouse_report(hid_mouse_report_t const * report) {
-  // for some reason... x is buttons, y is x and wheel is y
-  btns = ((report->x & MOUSE_BUTTON_LEFT)   ? 0 : 4)
-       | ((report->x & MOUSE_BUTTON_MIDDLE) ? 0 : 2)
-       | ((report->x & MOUSE_BUTTON_RIGHT)  ? 0 : 1)
+  btns = ((report->buttons & MOUSE_BUTTON_LEFT)   ? 0 : 4)
+       | ((report->buttons & MOUSE_BUTTON_MIDDLE) ? 0 : 2)
+       | ((report->buttons & MOUSE_BUTTON_RIGHT)  ? 0 : 1)
   ;
-  delta_x += report->y;
-  delta_y += -report->wheel;
+  delta_x += report->x;
+  delta_y += -report->y;
   delta_x = clamp(delta_x, -127, 127);
   delta_y = clamp(delta_y, -127, 127);
   updated = true;
