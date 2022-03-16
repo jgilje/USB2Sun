@@ -12,7 +12,7 @@ the octal shifter I found, but I couldn't find any.
 
 The Pico board is powered by the Sun workstation's 5V supply.
 
-I've used Pico SDK v1.3 when developing, but note that the supplied TinyUSB version may have problems with the Pico. I personally did not get any USB devices recognized until after https://github.com/hathach/tinyusb/commit/ab760290a514bc239c5ef8901ff8d80f64d461f9. Connecting via a USB hub required https://github.com/hathach/tinyusb/commit/1915d69cb8da8372b35a5067420c57ddb65d2cb1. Until a future Pico SDK release with updated TinyUSB stack, I recommend entering pico-sdk/lib/tinyusb and typing
+I've used Pico SDK v1.3 when developing, but note that the supplied TinyUSB version may have problems with the Pico. I personally did not get any USB devices recognized until after [ab760290a5](https://github.com/hathach/tinyusb/commit/ab760290a514bc239c5ef8901ff8d80f64d461f9). Connecting via a USB hub required [1915d69cb8](https://github.com/hathach/tinyusb/commit/1915d69cb8da8372b35a5067420c57ddb65d2cb1). Until a future Pico SDK release with updated TinyUSB stack, I recommend entering pico-sdk/lib/tinyusb and typing
 ```
 git fetch
 git checkout 1915d69cb8da8372b35a5067420c57ddb65d2cb1
