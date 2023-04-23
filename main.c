@@ -6,6 +6,9 @@
  * Adapted from the TinyUSB Host examples
  */
 
+
+#include <stdio.h>
+
 #include <bsp/board.h>
 #include <tusb.h>
 
@@ -16,7 +19,7 @@ void led_blinking_task(void);
 
 int main(void) {
   board_init();
-  tusb_init();
+  tuh_init(BOARD_TUH_RHPORT);
 
   keyboard_uart_init();
   mouse_uart_init();
@@ -47,4 +50,20 @@ void led_blinking_task(void)
 
   board_led_write(led_state);
   led_state = 1 - led_state; // toggle
+}
+
+//--------------------------------------------------------------------+
+// TinyUSB Callbacks
+//--------------------------------------------------------------------+
+
+void tuh_mount_cb(uint8_t dev_addr)
+{
+  // application set-up
+  printf("A device with address %d is mounted\r\n", dev_addr);
+}
+
+void tuh_umount_cb(uint8_t dev_addr)
+{
+  // application tear-down
+  printf("A device with address %d is unmounted \r\n", dev_addr);
 }
