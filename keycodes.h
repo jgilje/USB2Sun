@@ -15,7 +15,7 @@
 
 static const uint8_t usb2sun[256] = {
   [HID_KEY_HELP] = 0x76,
-  [HID_KEY_ESCAPE] = 0x0f,
+  [HID_KEY_ESCAPE] = 0x1d,
   [HID_KEY_F1] = 0x05,
   [HID_KEY_F2] = 0x06,
   [HID_KEY_F3] = 0x08,
