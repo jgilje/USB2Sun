@@ -12,23 +12,36 @@
 #include <bsp/board.h>
 #include <tusb.h>
 
+#include "hardware/watchdog.h"
+#include "pico/stdlib.h"
+
 extern void keyboard_uart_init();
 extern void mouse_uart_init();
 extern void mouse_tx();
 void led_blinking_task(void);
 
+volatile int keyboard_connected = 0;
+static int watchdog_enabled = 0;
+
 int main(void) {
   board_init();
+
   tuh_init(BOARD_TUH_RHPORT);
 
   keyboard_uart_init();
   mouse_uart_init();
+  printf("USB2Sun Init\n");
 
   while (true) {
     tuh_task();
     led_blinking_task();
 
     mouse_tx();
+    if (board_millis() > 15000 && keyboard_connected == 0 && watchdog_enabled == 0) {
+        printf("No USB devices, rebooting via watchdog\n");
+        watchdog_enable(100, 1);
+        watchdog_enabled = 1;
+    }
   }
 
   return 0;
@@ -59,11 +72,11 @@ void led_blinking_task(void)
 void tuh_mount_cb(uint8_t dev_addr)
 {
   // application set-up
-  printf("A device with address %d is mounted\r\n", dev_addr);
+  printf("\n\nA device with address %d is mounted\n\n", dev_addr);
 }
 
 void tuh_umount_cb(uint8_t dev_addr)
 {
   // application tear-down
-  printf("A device with address %d is unmounted \r\n", dev_addr);
+  printf("\n\nA device with address %d is unmounted \r\n", dev_addr);
 }

@@ -12,7 +12,7 @@ the octal shifter I found, but I couldn't find any.
 
 The Pico board is powered by the Sun workstation's 5V supply.
 
-This project is currently targetting Pico SDK 1.5.0, and the corresponding TinyUSB version.
+This project is currently targetting Pico SDK 1.5.1, and the corresponding TinyUSB version.
 
 
 Features
