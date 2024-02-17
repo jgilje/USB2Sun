@@ -20,7 +20,8 @@ extern void mouse_uart_init();
 extern void mouse_tx();
 void led_blinking_task(void);
 
-volatile int keyboard_connected = 0;
+int last_keyboard_connected = 0;
+int keyboard_connected = 0;
 static int watchdog_enabled = 0;
 
 int main(void) {
@@ -56,6 +57,28 @@ void led_blinking_task(void)
   static uint32_t start_ms = 0;
 
   static bool led_state = false;
+
+  if (last_keyboard_connected != keyboard_connected) {
+    for (int i = 0; i < 3; ++i) {
+      board_led_write(1);
+      sleep_ms(50);
+      board_led_write(0);
+      sleep_ms(50);
+    }
+    last_keyboard_connected = keyboard_connected;
+    return;
+  }
+
+  if (keyboard_connected) {
+    if (board_millis() - start_ms < 2000) {
+      board_led_write(0);
+    } else if (board_millis() - start_ms < 2100) {
+      board_led_write(1);
+    } else {
+      start_ms = board_millis();
+    }
+    return;
+  }
 
   // Blink every interval ms
   if ( board_millis() - start_ms < interval_ms) return; // not enough time
