@@ -27,6 +27,7 @@
 #include <tusb.h>
 
 extern volatile int keyboard_connected;
+extern volatile int mouse_connected;
 extern void process_kbd_report(hid_keyboard_report_t const *report);
 extern void process_mouse_report(hid_mouse_report_t const * report);
 
@@ -75,6 +76,12 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* desc_re
     ++keyboard_connected;
   }
 
+    if ( itf_protocol == HID_ITF_PROTOCOL_MOUSE )
+  {
+    printf("Mouse Connected!\n");
+    ++mouse_connected;
+  }
+
   // By default host stack will use activate boot protocol on supported interface.
   // Therefore for this simple example, we only need to parse generic report descriptor (with built-in parser)
   if ( itf_protocol == HID_ITF_PROTOCOL_NONE )
@@ -99,6 +106,11 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance)
   {
     printf("Keyboard Disconnected!\n");
     --keyboard_connected;
+  }
+  if ( itf_protocol == HID_ITF_PROTOCOL_MOUSE )
+  {
+    printf("Mouse Disconnected!\n");
+    --mouse_connected;
   }
   printf("HID device address = %d, instance = %d is unmounted\r\n", dev_addr, instance);
 }
