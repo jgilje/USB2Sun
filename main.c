@@ -21,7 +21,9 @@ extern void mouse_tx();
 void led_blinking_task(void);
 
 int last_keyboard_connected = 0;
+int last_mouse_connected = 0;
 int keyboard_connected = 0;
+int mouse_connected = 0;
 static int watchdog_enabled = 0;
 
 int main(void) {
@@ -38,7 +40,7 @@ int main(void) {
     led_blinking_task();
 
     mouse_tx();
-    if (board_millis() > 15000 && keyboard_connected == 0 && watchdog_enabled == 0) {
+    if (board_millis() > 15000 && keyboard_connected == 0 && mouse_connected == 0 && watchdog_enabled == 0) {
         printf("No USB devices, rebooting via watchdog\n");
         watchdog_enable(100, 1);
         watchdog_enabled = 1;
@@ -69,7 +71,18 @@ void led_blinking_task(void)
     return;
   }
 
-  if (keyboard_connected) {
+if (last_mouse_connected != mouse_connected) {
+    for (int i = 0; i < 5; ++i) {
+      board_led_write(1);
+      sleep_ms(150);
+      board_led_write(0);
+      sleep_ms(150);
+    }
+    last_mouse_connected = mouse_connected;
+    return;
+  }
+
+  if (keyboard_connected || mouse_connected) {
     if (board_millis() - start_ms < 2000) {
       board_led_write(0);
     } else if (board_millis() - start_ms < 2100) {

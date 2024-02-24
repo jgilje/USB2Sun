@@ -14,7 +14,6 @@ The Pico board is powered by the Sun workstation's 5V supply.
 
 This project is currently targetting Pico SDK 1.5.1, and the corresponding TinyUSB version.
 
-
 Features
 --------
 * Emulate the left keyboard function keys by entering LeftShift+LeftControl and the corresponding key
@@ -54,12 +53,19 @@ If your flashing with a Raspberry Pi, flash the firmware using
 
 Or copy usb2sun.uf2 onto the Pico when it's in flash mode.
 
+Usage
+-----
+Connect a USB mouse and keyboard using the OTG adapter.  Wireless combo sets will work best, as they do not require a hub.
+
+The project can be either plugged directly into the keyboard port on the workstation, or daisy-chained to a Sun keyboard.  If daisy-chaining to the keyboard, do not connect the UART1 pins (6 and 7), only connect UART0 TX (1) to the Mouse TX pin on the minidin.
+
 Parts required
 --------------
 * Raspberry Pico
 * 8 pin minidin male cable (I used
 https://no.rs-online.com/web/p/din-cable-assemblies/0463518)
 * 2 SN74LVC244AN
+* USB OTG adapter
 
 Wiring
 ------
